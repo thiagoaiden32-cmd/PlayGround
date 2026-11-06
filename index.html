@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#03060a" />
+  <meta name="description" content="ONE PORTAL — a single-emitter spatial traversal test. Three chambers, one portal, no second chance." />
+  <title>ONE PORTAL // Singularity Protocol</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js",
+        "three/addons/": "./vendor/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-label="3D test chamber"></canvas>
+
+  <div id="screenFx" aria-hidden="true">
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div id="flashFx"></div>
+    <div id="warnFx"></div>
+  </div>
+
+  <div id="hud" class="hidden" aria-hidden="true">
+    <div class="hud-top">
+      <div class="chamber-block">
+        <div class="microbrand"><span class="glyph"></span> HORIZON INITIATIVE <b>// SPATIAL SYSTEMS</b></div>
+        <div id="chamberTag" class="chamber-tag">TEST CHAMBER 01</div>
+        <div id="chamberName" class="chamber-name">CALIBRATION</div>
+        <div class="objective-row">
+          <span class="objective-label">OBJECTIVE</span>
+          <span id="objectiveText">Recover the flux core.</span>
+        </div>
+      </div>
+
+      <div class="status-stack">
+        <div class="status-card">
+          <div class="status-head"><span>FLUX ARRAY</span><span class="status-dot"></span></div>
+          <div class="core-row"><span id="coreCount">0 / 1</span><span class="core-bars" id="coreBars"><i></i></span></div>
+          <div class="status-rule"></div>
+          <div class="link-row"><span class="link-icon"></span><span id="portalStatus">NO LINK</span></div>
+        </div>
+        <div class="timer-card"><span>ELAPSED</span><b id="timer">00:00.0</b></div>
+      </div>
+    </div>
+
+    <div id="reticle" class="reticle">
+      <i class="r-tl"></i><i class="r-tr"></i><i class="r-bl"></i><i class="r-br"></i>
+      <span class="r-dot"></span>
+      <span id="aimLabel" class="aim-label"></span>
+    </div>
+
+    <div id="objectiveMarker" class="objective-marker hidden">
+      <span class="marker-diamond"></span>
+      <span id="markerText">EXTRACTION</span>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="control-strip">
+        <span><kbd>WASD</kbd> MOVE</span>
+        <span><kbd>SPACE</kbd> JUMP</span>
+        <span><kbd>SHIFT</kbd> SPRINT</span>
+        <span class="accent"><kbd>LMB</kbd> PLACE PORTAL</span>
+        <span><kbd>Q</kbd> RECALL</span>
+        <span><kbd>M</kbd> AUDIO</span>
+      </div>
+      <div class="control-strip mobile-strip">
+        <span>LEFT STICK MOVE</span>
+        <span>DRAG LOOK</span>
+        <span class="accent">PORTAL BUTTON</span>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <div id="levelIntro" class="level-intro">
+      <div class="intro-kicker">ENTERING</div>
+      <div id="introTag" class="intro-tag">TEST CHAMBER 01</div>
+      <div id="introName" class="intro-name">CALIBRATION</div>
+      <div id="introBrief" class="intro-brief">Recover the flux core.</div>
+    </div>
+  </div>
+
+  <section id="menu" class="menu-screen">
+    <div class="menu-shade"></div>
+    <header class="menu-header">
+      <div class="logo-mark"><span></span><span></span><span></span></div>
+      <div class="logo-copy">HORIZON<br /><b>INITIATIVE</b></div>
+      <div class="menu-header-right">SPATIAL SYSTEMS DIVISION<br /><b>TESTNET // 2087</b></div>
+    </header>
+
+    <div class="menu-content">
+      <div class="menu-kicker"><span></span> SINGLE-EMITTER TRAVERSAL TEST</div>
+      <h1><span class="h1-thin">ONE</span><span class="h1-bold">PORTAL</span></h1>
+      <div class="menu-rule"><span></span><b>01 / 01</b></div>
+      <p class="menu-lede">The lab gave you one device.<br />It can punch exactly one hole in space.</p>
+      <p class="menu-body">Every chamber hides a fixed cyan receiver. Place your single orange portal anywhere on a ceramic panel, then step through either side. Recover the flux array. Find the way out.</p>
+      <button id="startBtn" class="start-btn" type="button">
+        <span class="btn-index">01</span>
+        <span class="btn-label">INITIALIZE TEST</span>
+        <span class="btn-arrow">→</span>
+      </button>
+      <div class="menu-meta">
+        <span>3 CHAMBERS</span><span>1 PORTAL</span><span>NO SECOND CHANCE</span>
+      </div>
+    </div>
+
+    <aside class="menu-aside">
+      <div class="aside-line"></div>
+      <div class="aside-block">
+        <span class="aside-label">CONTROL SCHEME</span>
+        <div><kbd>WASD</kbd><span>move</span></div>
+        <div><kbd>SPACE</kbd><span>jump</span></div>
+        <div><kbd>LMB</kbd><span>place portal</span></div>
+        <div><kbd>Q</kbd><span>recall portal</span></div>
+      </div>
+      <div class="aside-block">
+        <span class="aside-label">FIELD NOTE</span>
+        <p>Your portal can be moved. Your anchor cannot. Choose the angle before you step in.</p>
+      </div>
+      <div class="aside-foot">MOUSE LOOK · POINTER LOCK · HEADPHONES RECOMMENDED</div>
+    </aside>
+
+    <div class="menu-footer">
+      <span>HORIZON INITIATIVE © 2087</span>
+      <span class="menu-load"><i></i> SPATIAL LATTICE STABLE</span>
+    </div>
+  </section>
+
+  <section id="pauseScreen" class="modal-screen hidden">
+    <div class="modal-card">
+      <div class="modal-kicker">TEST PAUSED</div>
+      <h2>HOLD POSITION</h2>
+      <p>The chamber will wait. Your portal link will not.</p>
+      <div class="modal-actions">
+        <button id="resumeBtn" class="primary" type="button">RESUME TEST <span>→</span></button>
+        <button id="restartBtn" class="secondary" type="button">RESTART CHAMBER</button>
+        <button id="quitBtn" class="ghost" type="button">ABANDON TEST</button>
+      </div>
+      <div class="modal-foot">ESC / POINTER UNLOCK</div>
+    </div>
+  </section>
+
+  <section id="completeScreen" class="modal-screen hidden">
+    <div class="modal-card complete-card">
+      <div id="completeKicker" class="modal-kicker">CHAMBER CLEARED</div>
+      <h2 id="completeTitle">CALIBRATION COMPLETE</h2>
+      <p id="completeBody">The array is stable. The way forward is open.</p>
+      <div class="result-grid">
+        <div><span>CHAMBER TIME</span><b id="resultTime">00:00.0</b></div>
+        <div><span>FLUX RECOVERED</span><b id="resultCores">1 / 1</b></div>
+        <div><span>PORTAL SHIFTS</span><b id="resultTeleports">0</b></div>
+      </div>
+      <div class="modal-actions">
+        <button id="nextBtn" class="primary" type="button">NEXT CHAMBER <span>→</span></button>
+        <button id="replayLevelBtn" class="ghost hidden" type="button">REPLAY CHAMBER</button>
+      </div>
+      <div class="modal-foot" id="completeFoot">SINGLE-EMITTER LINK HELD STABLE</div>
+    </div>
+  </section>
+
+  <section id="endingScreen" class="modal-screen hidden">
+    <div class="ending-card">
+      <div class="ending-kicker">HORIZON INITIATIVE // FINAL LOG</div>
+      <h2>PROTOCOL<br /><span>COMPLETE</span></h2>
+      <p>Three chambers. One portal. You made every placement count.</p>
+      <div class="ending-stats">
+        <div><b id="endTime">00:00</b><span>TOTAL TIME</span></div>
+        <div><b id="endCores">8</b><span>FLUX CORES</span></div>
+        <div><b id="endPlacements">0</b><span>PORTAL SHIFTS</span></div>
+      </div>
+      <button id="runAgainBtn" class="primary" type="button">RUN PROTOCOL AGAIN <span>→</span></button>
+      <div class="ending-foot">HORIZON INITIATIVE // THANK YOU FOR TESTING</div>
+    </div>
+  </section>
+
+  <div id="touchControls" class="touch-controls hidden">
+    <div id="joystick" class="joystick"><div class="joy-ring"></div><div id="stick" class="stick"></div></div>
+    <div class="touch-action-stack">
+      <button id="touchRecall" class="touch-btn small" type="button" aria-label="Recall portal">↺</button>
+      <button id="touchJump" class="touch-btn" type="button" aria-label="Jump">↑</button>
+      <button id="touchPortal" class="touch-btn portal" type="button" aria-label="Place portal">◎</button>
+    </div>
+  </div>
+
+  <button id="pauseBtn" class="pause-btn" type="button" aria-label="Pause test">Ⅱ</button>
+  <div id="audioBadge" class="audio-badge hidden">SOUND ON</div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
